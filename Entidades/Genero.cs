@@ -10,5 +10,6 @@ namespace PeliculasAPI.Entidades
         public string Nombre { get; set; }
         [Required(ErrorMessage = "El campo {0} es requerido")]
         public string Descripcion { get; set; }
+        public List<PeliculasGeneros> PeliculasGeneros { get; set; }
     }
 }

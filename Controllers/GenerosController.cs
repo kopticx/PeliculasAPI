@@ -41,7 +41,7 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpPost("PostGenero")]
-        public async Task<IActionResult> PostGenero([FromBody] GeneroDTO model)
+        public async Task<IActionResult> PostGenero([FromBody] GeneroCreacionDTO model)
         {
             var genero = mapper.Map<Genero>(model);
 
@@ -52,7 +52,7 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpPut("UpdateGenero/{id:int}")]
-        public async Task<IActionResult> UpdateGenero(int id, [FromBody] GeneroDTO model)
+        public async Task<IActionResult> UpdateGenero(int id, [FromBody] GeneroCreacionDTO model)
         {
             var genero = await context.Generos.FirstOrDefaultAsync(x => x.Id == id);
 

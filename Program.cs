@@ -1,12 +1,16 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using PeliculasAPI;
+using PeliculasAPI.Entidades;
 using PeliculasAPI.Servicios;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -16,7 +20,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddSingleton<GeometryFactory>(NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326));
 
-builder.Services.AddSingleton(provider => 
+builder.Services.AddSingleton(provider =>
     new MapperConfiguration(config =>
     {
         var geometryFactory = provider.GetRequiredService<GeometryFactory>();
@@ -26,7 +30,7 @@ builder.Services.AddSingleton(provider =>
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer("name=DefaultConnection", sqlServer => sqlServer.UseNetTopologySuite()));
-builder.Services.AddTransient<IAlmacenadorArchivos,  AlmacenadorArchivos>();
+builder.Services.AddTransient<IAlmacenadorArchivos, AlmacenadorArchivos>();
 
 builder.Services.AddCors(options =>
 {
@@ -34,9 +38,27 @@ builder.Services.AddCors(options =>
 
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins(frontendURL).AllowAnyMethod().AllowAnyHeader();
+        builder.WithOrigins(frontendURL).AllowAnyMethod().AllowAnyHeader().WithExposedHeaders(new string[] { "cantidadTotalRegistros" });
     });
 });
+
+builder.Services.AddIdentity<Usuario, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opciones =>
+                opciones.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("jwt"))),
+                    ClockSkew = TimeSpan.Zero
+                });
+
+
 
 var app = builder.Build();
 
@@ -58,6 +80,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseCors();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

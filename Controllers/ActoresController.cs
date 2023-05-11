@@ -44,7 +44,7 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpPost("PostActor")]
-        public async Task<IActionResult> PostActor([FromForm] ActorDTO model)
+        public async Task<IActionResult> PostActor([FromForm] ActorCreacionDTO model)
         {
             var actor = mapper.Map<Actor>(model);
             var result = await almacenadorArchivos.Almacenar(model.Foto);
@@ -56,7 +56,7 @@ namespace PeliculasAPI.Controllers
         }
 
         [HttpPut("PutActor/{id:int}")]
-        public async Task<IActionResult> PutActor(int id, [FromForm] ActorDTO model)
+        public async Task<IActionResult> PutActor(int id, [FromForm] ActorCreacionDTO model)
         {
             var actor = await context.Actores.FirstOrDefaultAsync(x => x.Id == id);
 
